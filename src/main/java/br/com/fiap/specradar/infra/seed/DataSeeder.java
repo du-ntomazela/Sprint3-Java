@@ -97,26 +97,39 @@ public class DataSeeder implements ApplicationRunner {
         }
         try {
             VeiculoSeed seed = objectMapper.readValue(caminho.toFile(), VeiculoSeed.class);
-            Optional<Veiculo> existente = veiculoRepository
+            Veiculo veiculo = veiculoRepository
                     .findByMarcaIgnoreCaseAndModeloIgnoreCaseAndVersaoIgnoreCaseAndAtivoTrue(
-                            seed.marca(), seed.modelo(), seed.versao());
-            if (existente.isPresent()) {
-                return;
-            }
+                            seed.marca(), seed.modelo(), seed.versao())
+                    .orElseGet(() -> veiculoRepository.save(
+                            new Veiculo(null, seed.marca(), seed.modelo(), seed.versao(), seed.ano(), true, new ArrayList<>())));
 
-            Veiculo veiculo = new Veiculo(null, seed.marca(), seed.modelo(), seed.versao(), seed.ano(), true, new ArrayList<>());
-            veiculoRepository.save(veiculo);
-
+            int criadas = 0;
+            int atualizadas = 0;
             if (seed.especificacoes() != null) {
-                seed.especificacoes().stream()
-                        .filter(especificacao -> especificacao.valor() != null && !especificacao.valor().isBlank())
-                        .forEach(especificacao -> atributoRepository.findByCodigoAndAtivoTrue(especificacao.atributo())
-                                .ifPresent(atributo -> veiculo.getEspecificacoes().add(
-                                        new EspecificacaoVeiculo(veiculo, atributo, especificacao.valor(), especificacao.fonte()))));
+                for (VeiculoSeed.EspecificacaoSeed especificacaoSeed : seed.especificacoes()) {
+                    if (especificacaoSeed.valor() == null || especificacaoSeed.valor().isBlank()) {
+                        continue;
+                    }
+                    Optional<Atributo> atributo = atributoRepository.findByCodigoAndAtivoTrue(especificacaoSeed.atributo());
+                    if (atributo.isEmpty()) {
+                        continue;
+                    }
+                    Optional<EspecificacaoVeiculo> existente = veiculo.getEspecificacoes().stream()
+                            .filter(e -> e.getAtributo().getId().equals(atributo.get().getId()))
+                            .findFirst();
+                    if (existente.isPresent()) {
+                        existente.get().atualizarInformacoes(especificacaoSeed.valor(), especificacaoSeed.fonte());
+                        atualizadas++;
+                    } else {
+                        veiculo.getEspecificacoes().add(new EspecificacaoVeiculo(
+                                veiculo, atributo.get(), especificacaoSeed.valor(), especificacaoSeed.fonte()));
+                        criadas++;
+                    }
+                }
             }
             veiculoRepository.save(veiculo);
-            logger.info("Veículo de validação {} {} {} semeado a partir de {}",
-                    seed.marca(), seed.modelo(), seed.versao(), caminho);
+            logger.info("Veículo de validação {} {} {} sincronizado a partir de {} ({} especificações criadas, {} atualizadas)",
+                    seed.marca(), seed.modelo(), seed.versao(), caminho, criadas, atualizadas);
         } catch (Exception e) {
             logger.error("Erro ao semear veículo de validação a partir de {}", caminho, e);
         }
