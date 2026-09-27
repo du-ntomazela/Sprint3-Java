@@ -28,7 +28,7 @@ jobs:
 
       - name: Publicar relatório de testes
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: relatorio-testes
           path: target/surefire-reports
@@ -85,7 +85,7 @@ jobs:
             --failOnCVSS 7
       - name: Publicar relatório
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: relatorio-dependency-check
           path: reports
