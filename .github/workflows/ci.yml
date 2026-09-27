@@ -98,7 +98,7 @@ jobs:
       - name: Build da imagem
         run: docker build -t specradar:ci .
       - name: Trivy na imagem
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: specradar:ci
           format: table
