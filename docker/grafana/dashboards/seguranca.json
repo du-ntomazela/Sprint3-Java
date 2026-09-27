@@ -1,0 +1,50 @@
+{
+  "title": "SpecRadar - Segurança",
+  "uid": "specradar-seguranca",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Falhas de login por IP (5 min)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (ip) (increase(specradar_auth_login_failure_total[5m]))", "legendFormat": "{{ip}}"}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Requisições bloqueadas por rate limit",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (rota) (rate(specradar_rate_limit_exceeded_total[5m]))", "legendFormat": "{{rota}}"}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Trocas de perfil de usuário",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 8},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum(specradar_role_changes_total)"}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Eventos de segurança (logs)",
+      "type": "logs",
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 14},
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "targets": [
+        {"expr": "{evento=~\"AUTH_LOGIN_FAILURE|AUTH_TOKEN_INVALID|ACCESS_DENIED|RATE_LIMIT_EXCEEDED|USER_ROLE_CHANGED\"}"}
+      ]
+    }
+  ]
+}

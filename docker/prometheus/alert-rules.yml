@@ -1,0 +1,44 @@
+groups:
+  - name: specradar-seguranca
+    rules:
+      - alert: ForcaBrutaDeLoginDetectada
+        expr: sum by (ip) (increase(specradar_auth_login_failure_total[5m])) > 10
+        for: 0m
+        labels:
+          severidade: critica
+        annotations:
+          summary: "Mais de 10 falhas de login do mesmo IP em 5 minutos"
+          description: "IP {{ $labels.ip }} teve {{ $value }} falhas de login nos últimos 5 minutos."
+
+  - name: specradar-operacao
+    rules:
+      - alert: TaxaDeErro5xxAlta
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="specradar-api", status=~"5.."}[5m]))
+          /
+          sum(rate(http_server_requests_seconds_count{job="specradar-api"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severidade: critica
+        annotations:
+          summary: "Taxa de erros 5xx acima de 5%"
+          description: "A API SpecRadar está retornando mais de 5% de respostas 5xx nos últimos 5 minutos."
+
+      - alert: LatenciaP95Alta
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="specradar-api"}[5m])) by (le)) > 2
+        for: 2m
+        labels:
+          severidade: alerta
+        annotations:
+          summary: "Latência p95 acima de 2 segundos"
+          description: "O p95 de latência da API SpecRadar está acima de 2s nos últimos 5 minutos."
+
+      - alert: ServicoIndisponivel
+        expr: up{job="specradar-api"} == 0
+        for: 1m
+        labels:
+          severidade: critica
+        annotations:
+          summary: "API SpecRadar fora do ar"
+          description: "O serviço specradar-api está fora do ar há mais de 1 minuto."

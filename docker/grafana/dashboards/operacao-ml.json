@@ -1,0 +1,76 @@
+{
+  "title": "SpecRadar - Operação e ML",
+  "uid": "specradar-operacao-ml",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Disponibilidade da API",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "up{job=\"specradar-api\"}"}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Taxa de requisições",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (uri) (rate(http_server_requests_seconds_count{job=\"specradar-api\"}[5m]))", "legendFormat": "{{uri}}"}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Taxa de erros 5xx",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"specradar-api\", status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{job=\"specradar-api\"}[5m]))",
+          "legendFormat": "erro 5xx"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Latência p95",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"specradar-api\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Falhas ao consultar o serviço de ML",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "rate(specradar_source_fetch_errors_total[5m])"}
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Logs de pesquisas e falhas de fonte",
+      "type": "logs",
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 24},
+      "datasource": {"type": "loki", "uid": "Loki"},
+      "targets": [
+        {"expr": "{evento=~\"SPEC_SEARCH_EXECUTED|SOURCE_FETCH_FAILED|ATTRIBUTE_CATALOG_CHANGED\"}"}
+      ]
+    }
+  ]
+}

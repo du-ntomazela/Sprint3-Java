@@ -1,0 +1,88 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-specradar}
+      MYSQL_DATABASE: ${DB_NAME:-specradar}
+    ports:
+      - "3306:3306"
+    volumes:
+      - specradar-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-specradar}
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-specradar}
+      JWT_SECRET: ${JWT_SECRET:?informe um JWT_SECRET forte}
+      ML_URL: ${ML_URL:-http://ml:8000}
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-admin@specradar.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?informe a senha do usuario admin}
+      ANALISTA_LOGIN: ${ANALISTA_LOGIN:-analista@specradar.com}
+      ANALISTA_PASSWORD: ${ANALISTA_PASSWORD:?informe a senha do usuario analista}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5500}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    volumes:
+      - ./dados:/app/dados:ro
+    working_dir: /app
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+
+  loki:
+    image: grafana/loki:3.2.1
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./docker/loki:/etc/loki
+    ports:
+      - "3100:3100"
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./docker/promtail:/etc/promtail
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?informe a senha do admin do grafana}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - loki
+
+volumes:
+  specradar-mysql:

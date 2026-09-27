@@ -1,0 +1,30 @@
+{
+  "marca": "Ford",
+  "modelo": "Ranger",
+  "versao": "Raptor",
+  "ano": 2024,
+  "especificacoes": [
+    {"atributo": "potencia", "valor": "", "fonte": ""},
+    {"atributo": "torque", "valor": "", "fonte": ""},
+    {"atributo": "cilindrada", "valor": "", "fonte": ""},
+    {"atributo": "cambio", "valor": "", "fonte": ""},
+    {"atributo": "tracao", "valor": "", "fonte": ""},
+    {"atributo": "velocidade_maxima", "valor": "", "fonte": ""},
+    {"atributo": "aceleracao_0_100", "valor": "", "fonte": ""},
+    {"atributo": "consumo_cidade", "valor": "", "fonte": ""},
+    {"atributo": "consumo_estrada", "valor": "", "fonte": ""},
+    {"atributo": "capacidade_tanque", "valor": "", "fonte": ""},
+    {"atributo": "capacidade_carga", "valor": "", "fonte": ""},
+    {"atributo": "peso", "valor": "", "fonte": ""},
+    {"atributo": "comprimento", "valor": "", "fonte": ""},
+    {"atributo": "largura", "valor": "", "fonte": ""},
+    {"atributo": "altura", "valor": "", "fonte": ""},
+    {"atributo": "entre_eixos", "valor": "", "fonte": ""},
+    {"atributo": "vao_livre_solo", "valor": "", "fonte": ""},
+    {"atributo": "direcao", "valor": "", "fonte": ""},
+    {"atributo": "freios", "valor": "", "fonte": ""},
+    {"atributo": "airbags", "valor": "", "fonte": ""},
+    {"atributo": "rodas", "valor": "", "fonte": ""},
+    {"atributo": "garantia", "valor": "", "fonte": ""}
+  ]
+}
