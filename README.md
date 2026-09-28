@@ -1,3 +1,8 @@
+# Participantes
+- Eduardo Tomazela do Nascimento rm556807
+- Léo Masago rm557769
+- Luiz Henrique Silva rm555735
+
 # SpecRadar
 
 API de inteligência competitiva automotiva — Desafio Ford 01, FIAP Sprint 3 (Arquitetura Orientada a Serviços e Web Services).
