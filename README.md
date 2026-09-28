@@ -1,6 +1,6 @@
 # Participantes
 - Eduardo Tomazela do Nascimento rm556807
-- Léo Masago rm557769
+- Léo Masago rm557768
 - Luiz Henrique Silva rm555735
 
 # SpecRadar
