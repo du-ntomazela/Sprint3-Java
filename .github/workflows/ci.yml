@@ -57,13 +57,13 @@ jobs:
           java-version: "25"
           cache: maven
       - name: Inicializar CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: java
       - name: Build
         run: mvn -B -DskipTests package
       - name: Analisar com CodeQL
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   dependency-check:
     runs-on: ubuntu-latest
